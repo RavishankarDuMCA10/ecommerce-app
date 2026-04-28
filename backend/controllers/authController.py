@@ -1,0 +1,66 @@
+from typing import Annotated
+from services import authService
+from models import authModel
+from fastapi.exceptions import HTTPException
+from fastapi import File, UploadFile
+
+
+async def registerController(data: authModel.RegisterUser):
+    try:
+        res_obj = await authService.registerService(data)
+        return res_obj
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"{str(e)}")
+
+
+async def loginController(data: authModel.LoginUser):
+    try:
+        res_obj = await authService.loginService(data)
+        return res_obj
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"{e}")
+
+
+async def profileController(userId: str):
+    try:
+        res_obj = await authService.profileService(userId)
+        return res_obj
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"{e}")
+
+
+async def updateAvatarController(avatar: Annotated[UploadFile, File()], userId: str):
+    try:
+        res_obj = await authService.updateAvatarService(avatar, userId)
+        return res_obj
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"{e}")
+
+
+async def updateBasicDetailsController(data: authModel.UpdateBasicDetails, userId: str):
+    try:
+        res_obj = await authService.updateBasicDetailsService(data, userId)
+        return res_obj
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=f"{e}")
+
+
+async def addNewAddressController(data: authModel.AddressModel, userID: str):
+    try:
+        res_obj = await authService.addNewAddressService(data, userID)
+        return res_obj
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"{e}")
+
+
+async def deleteAddressController(id: str, userID: str):
+    try:
+        res_obj = await authService.deleteAddressService(id, userID)
+        return res_obj
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"{e}")

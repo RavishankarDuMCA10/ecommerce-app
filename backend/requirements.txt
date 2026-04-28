@@ -1,0 +1,11 @@
+PyJWT
+bcrypt
+fastapi[standard]
+motor
+python-dotenv
+uvicorn
+cloudinary
+python-multipart
+python-slugify
+uuid
+pytest
