@@ -4,6 +4,7 @@ from routes.productRoute import router as ProductRouter
 from routes.publicRoute import router as PublicRouter
 from fastapi.middleware.cors import CORSMiddleware
 from routes.wishListRoute import router as WishListRouter
+from config.Env import ENVConfig
 
 # Create a FastAPI instance
 app = FastAPI()
@@ -13,7 +14,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_headers=["*"],
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", ENVConfig.FRONTEND_URL],
     allow_credentials=True,
 )
 

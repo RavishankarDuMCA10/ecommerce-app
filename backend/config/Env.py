@@ -12,3 +12,4 @@ class ENVConfig:
     API_KEY_CLOUDINARY = os.getenv("API_KEY_CLOUDINARY", "")
     API_SECRET_CLOUDINARY = os.getenv("API_SECRET_CLOUDINARY", "")
     CLOUD_NAME_CLOUDINARY = os.getenv("CLOUD_NAME_CLOUDINARY", "")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
