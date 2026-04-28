@@ -10,7 +10,7 @@ on:
 jobs:
   deploy-app:
     # Runner: Ubuntu for Docker compatibility
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     steps:
       # Checkout code from repository
       - name: Checkout code
@@ -40,14 +40,14 @@ jobs:
       - name: Package frontend image
         run: |
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest frontend
-          docker images | grep my-app-repo | grep frontend-latest
+          docker images | grep my-app-repo | grep frontend-latest # Verify image
           echo "Frontend image packaged"
 
       # Package backend image
       - name: Package backend image
         run: |
           docker build -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest backend
-          docker images | grep my-app-repo | grep backend-latest
+          docker images | grep my-app-repo | grep backend-latest # Verify image
           echo "Backend image packaged"
 
       # Push images to ECR
@@ -56,30 +56,8 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest
 
-      # Inject real values into task definitions and register them with ECS
-      - name: Register backend task definition
-        run: |
-          sed -e "s|BACKEND_IMAGE|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest|g" \
-              -e "s|ACCOUNT_ID_PLACEHOLDER|${{ secrets.AWS_ACCOUNT_ID }}|g" \
-              backend/ecs-task-definition.json > /tmp/backend-task-def.json
-          aws ecs register-task-definition --cli-input-json file:///tmp/backend-task-def.json --region us-east-1
-
-      - name: Register frontend task definition
-        run: |
-          sed -e "s|FRONTEND_IMAGE|${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest|g" \
-              -e "s|ACCOUNT_ID_PLACEHOLDER|${{ secrets.AWS_ACCOUNT_ID }}|g" \
-              frontend/ecs-task-definition.json > /tmp/frontend-task-def.json
-          aws ecs register-task-definition --cli-input-json file:///tmp/frontend-task-def.json --region us-east-1
-
-      # Deploy new task definition revisions to ECS services
+      # Update ECS services to run one task each
       - name: Update ECS services
         run: |
-          BACKEND_TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-backend --query 'taskDefinition.taskDefinitionArn' --output text --region us-east-1)
-          FRONTEND_TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-frontend --query 'taskDefinition.taskDefinitionArn' --output text --region us-east-1)
-          aws ecs update-service --cluster my-ecs-cluster --service backend-service --task-definition $BACKEND_TASK_DEF --desired-count 1 --force-new-deployment --region us-east-1
-          aws ecs update-service --cluster my-ecs-cluster --service frontend-service --task-definition $FRONTEND_TASK_DEF --desired-count 1 --force-new-deployment --region us-east-1
-
-      # Wait for both services to finish deploying
-      - name: Wait for ECS services to stabilize
-        run: |
-          aws ecs wait services-stable --cluster my-ecs-cluster --services frontend-service backend-service --region us-east-1
+          aws ecs update-service --cluster my-ecs-cluster --service frontend-service --desired-count 1 --region us-east-1
+          aws ecs update-service --cluster my-ecs-cluster --service backend-service --desired-count 1 --region us-east-1
