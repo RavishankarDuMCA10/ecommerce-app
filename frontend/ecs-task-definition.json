@@ -4,23 +4,23 @@
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::<AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::ACCOUNT_ID_PLACEHOLDER:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "frontend",
-      "image": "<DOCKERHUB_USERNAME>/ecommerce-frontend:latest",
+      "image": "FRONTEND_IMAGE",
+      "essential": true,
       "portMappings": [
         {
           "containerPort": 80,
           "protocol": "tcp"
         }
       ],
-      "essential": true,
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/ecommerce-frontend",
-          "awslogs-region": "<AWS_REGION>",
+          "awslogs-region": "us-east-1",
           "awslogs-stream-prefix": "ecs"
         }
       },
