@@ -36,15 +36,6 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
 
-      # Package frontend image (VITE_API_URL baked in at build time)
-      - name: Package frontend image
-        run: |
-          docker build \
-            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
-            -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest \
-            frontend
-          echo "Frontend image packaged"
-
       # Package backend image
       - name: Package backend image
         run: |
@@ -53,11 +44,20 @@ jobs:
             backend
           echo "Backend image packaged"
 
+      # Package frontend image (VITE_API_URL baked in at build time)
+      - name: Package frontend image
+        run: |
+          docker build \
+            --build-arg VITE_API_URL=${{ secrets.VITE_API_URL }} \
+            -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest \
+            frontend
+          echo "Frontend image packaged"      
+
       # Push images to ECR
       - name: Push images to ECR
-        run: |
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest
+        run: |          
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest
 
       # Register new backend task definition revision with updated image
       - name: Register backend task definition
@@ -88,4 +88,4 @@ jobs:
       # Wait for both services to finish deploying
       - name: Wait for ECS services to stabilize
         run: |
-          aws ecs wait services-stable --cluster my-ecs-cluster --services frontend-service backend-service --region us-east-1
+          aws ecs wait services-stable --cluster my-ecs-cluster --services backend-service frontend-service --region us-east-1
