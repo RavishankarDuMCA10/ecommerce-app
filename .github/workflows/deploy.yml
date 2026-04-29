@@ -59,23 +59,23 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest
 
-      # Register new backend task definition revision with updated image
-      - name: Register backend task definition
-        run: |
-          TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-backend --region us-east-1 --query 'taskDefinition' --output json)
-          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
-            --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest" \
-            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
-          aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --region us-east-1
+      # # Register new backend task definition revision with updated image
+      # - name: Register backend task definition
+      #   run: |
+      #     TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-backend --region us-east-1 --query 'taskDefinition' --output json)
+      #     NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+      #       --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:backend-latest" \
+      #       '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
+      #     aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --region us-east-1
 
-      # Register new frontend task definition revision with updated image
-      - name: Register frontend task definition
-        run: |
-          TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-frontend --region us-east-1 --query 'taskDefinition' --output json)
-          NEW_TASK_DEF=$(echo $TASK_DEF | jq \
-            --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest" \
-            '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
-          aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --region us-east-1
+      # # Register new frontend task definition revision with updated image
+      # - name: Register frontend task definition
+      #   run: |
+      #     TASK_DEF=$(aws ecs describe-task-definition --task-definition ecommerce-frontend --region us-east-1 --query 'taskDefinition' --output json)
+      #     NEW_TASK_DEF=$(echo $TASK_DEF | jq \
+      #       --arg IMAGE "${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/my-app-repo:frontend-latest" \
+      #       '.containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn,.revision,.status,.requiresAttributes,.placementConstraints,.compatibilities,.registeredAt,.registeredBy)')
+      #     aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEF" --region us-east-1
 
       # Deploy new task definition revisions to ECS services
       # - name: Update ECS services
@@ -86,10 +86,13 @@ jobs:
       #     # aws ecs update-service --cluster my-ecs-cluster --service frontend-service --task-definition $FRONTEND_TASK_DEF --desired-count 1  --force-new-deployment --region us-east-1
 
 
+      # - name: Update ECS services
+      #   run: |
+      #     aws ecs update-service --cluster my-ecs-cluster --service backend-service --force-new-deployment --deployment-configuration "minimumHealthyPercent=0,maximumPercent=200" --region us-east-1
+
       - name: Update ECS services
         run: |
-          aws ecs update-service --cluster my-ecs-cluster --service backend-service --force-new-deployment --deployment-configuration "minimumHealthyPercent=0,maximumPercent=200" --region us-east-1
-
+          aws ecs update-service --cluster my-ecs-cluster --service frontend-service --force-new-deployment --deployment-configuration "minimumHealthyPercent=0,maximumPercent=200" --region us-east-1
       
       # - name: Update ECS services
       #   run: |
