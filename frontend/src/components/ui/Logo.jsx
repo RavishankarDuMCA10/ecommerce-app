@@ -9,7 +9,7 @@ const Logo  = () => {
             <span className="text-black text-3xl">
                 <FiShoppingBag />
             </span>                
-            <span className="ml-3 text-xl">Ecommerce</span>
+            <span className="ml-3 text-xl">Ecomm</span>
         </Link>
     </>
   )
